@@ -4,24 +4,22 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("test")
 public class Location {
-    private double latitiude;
-    private double longitude;
+    private String latitude;
 
     public Location() {}
+    private String longitude;
 
-    public double getLatitiude() {
-        return latitiude;
+    public String getLatitude() {
+        return latitude;
     }
 
-    public void setLatitiude(double latitiude) {
-        this.latitiude = latitiude;
-    }
+    public void setLatitude(String latitude) { this.latitude = latitude; }
 
-    public double getLongitude() {
+    public String getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(String longitude) {
         this.longitude = longitude;
     }
 }

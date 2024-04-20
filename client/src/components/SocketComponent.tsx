@@ -1,45 +1,50 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { socket } from "../socket";
+import { useEffect } from 'react';
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 
-export default function SocketComponent() {
-  const [isConnected, setIsConnected] = useState(false);
-  const [transport, setTransport] = useState("N/A");
-
+const WebSocketComponent: React.FC = () => {
   useEffect(() => {
-    if (socket.connected) {
-      onConnect();
-    }
+    // Create a new SockJS connection
+    const socket = new SockJS('http://localhost:8080/ws');
+    // Create a STOMP client over the SockJS connection
+    const client = new Client({
+      webSocketFactory: () => socket,  // Use the SockJS connection for the STOMP client
+      debug: (str) => {
+        console.log(str);
+      },
+    });
 
-    function onConnect() {
-      setIsConnected(true);
-      setTransport(socket.io.engine.transport.name);
+    // Connect to the STOMP server
+    client.onConnect = (frame) => {
+      console.log('Connected: ' + frame);
 
-      socket.io.engine.on("upgrade", (transport) => {
-        setTransport(transport.name);
+      // Subscribe to a topic provided by the server
+      client.subscribe('/topic/locations', (message) => {
+        // Called when the client receives a message from the subscribed topic
+        console.log('Message received: ' + message.body);
       });
-      console.log("connectedd")
-    }
+    };
 
-    function onDisconnect() {
-      setIsConnected(false);
-      setTransport("N/A");
-    }
+    client.onStompError = (frame) => {
+      console.error('STOMP Error:', frame.headers.message);
+      console.error('STOMP Error Details:', frame.body);
+    };
 
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
+    // Activate the STOMP client
+    client.activate();
 
     return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
+      client.deactivate();  // Clean up the connection when the component unmounts
     };
   }, []);
 
   return (
     <div>
-      <p>Status: {isConnected ? "connected" : "disconnected"}</p>
-      <p>Transport: {transport}</p>
+      WebSocket Component: React component that establishes WebSocket connection using SockJS and STOMP.
     </div>
   );
-}
+};
+
+export default WebSocketComponent;

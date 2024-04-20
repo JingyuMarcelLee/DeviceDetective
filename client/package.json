@@ -10,12 +10,13 @@
   },
   "dependencies": {
     "@react-google-maps/api": "^2.19.3",
+    "@stomp/stompjs": "^7.0.0",
     "@types/google.maps": "^3.55.7",
+    "@types/sockjs-client": "^1.5.4",
     "next": "14.1.4",
     "react": "^18",
     "react-dom": "^18",
-    "socket.io": "^4.7.5",
-    "socket.io-client": "^4.7.5"
+    "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
     "@types/node": "^20",

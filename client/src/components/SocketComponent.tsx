@@ -22,7 +22,7 @@ const WebSocketComponent = ({ props }: {props: {id: string, locations: Array<any
     console.log('Client:', client); // Check the value of client
     if (isConnected && client) {
       // Send message to the server
-      client!.publish({ destination: '/app/sendLocation', body: JSON.stringify(message) });
+      client!.publish({ destination: '/app/syncLocations', body: JSON.stringify(message) });
       console.log('Message sent:', message);
     } else {
       console.error('WebSocket is not connected.');
@@ -46,7 +46,7 @@ const WebSocketComponent = ({ props }: {props: {id: string, locations: Array<any
       // Subscribe to a topic provided by the server
       console.log(isConnected)
       console.log(client)
-      stompClient.subscribe('/topic/locations', (message) => {
+      stompClient.subscribe('/queue/locations', (message) => {
         // Called when the client receives a message from the subscribed topic
         let parsedMessage: { _id: { timestamp: number; date: string }; clientId: string; latitude: string; longitude: string } = JSON.parse(message.body);
         let locationJSON: LocationPayload = {

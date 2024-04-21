@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState, useRef, MutableRefObject } from "react";
 import {
   GoogleMap,
@@ -10,22 +10,31 @@ import {
 
 import WebSocketComponent from "./SocketComponent";
 
-const MapService = ({ locations, sendMessage, id }: { locations: Array<any>; sendMessage: (message: any) => void ; id:string}) => {
+const MapService = ({
+  locations,
+  sendMessage,
+  id,
+}: {
+  locations: Array<any>;
+  sendMessage: (message: any) => void;
+  id: string;
+}) => {
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [searchLngLat, setSearchLngLat] = useState<any>(null);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
+  const [currentLocation, setCurrentLocation] = useState<Array<any>>([null]);
   const autocompleteRef = useRef<google.maps.places.Autocomplete>();
   const [address, setAddress] = useState("");
-  const libraries = ["places"] as Libraries
-  const libRef = useRef(libraries)
+  const libraries = ["places"] as Libraries;
+  const libRef = useRef(libraries);
 
   // load script for google map
-  const googleMapsApiKey:string = process.env!.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!
+  const googleMapsApiKey: string =
+    process.env!.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: googleMapsApiKey,
     libraries: libRef.current,
   });
-  
+
   if (!isLoaded) return <div>Loading....</div>;
 
   // static lat and lng
@@ -34,7 +43,8 @@ const MapService = ({ locations, sendMessage, id }: { locations: Array<any>; sen
   // handle place change on search
   const handlePlaceChanged = () => {
     if (autocompleteRef.current!) {
-      const place: google.maps.places.PlaceResult = autocompleteRef.current.getPlace();
+      const place: google.maps.places.PlaceResult =
+        autocompleteRef.current.getPlace();
       setSelectedPlace(place);
       if (place.geometry!.location) {
         setSearchLngLat({
@@ -43,7 +53,7 @@ const MapService = ({ locations, sendMessage, id }: { locations: Array<any>; sen
         });
       }
     }
-    setCurrentLocation(null);
+    setCurrentLocation([null]);
   };
 
   // get current location
@@ -54,8 +64,15 @@ const MapService = ({ locations, sendMessage, id }: { locations: Array<any>; sen
           const { latitude, longitude } = position.coords;
           setSelectedPlace(null);
           setSearchLngLat(null);
-          setCurrentLocation({lat: latitude, lng: longitude });
-          sendMessage({clientId: id, latitude: latitude, longitude: longitude})
+          setCurrentLocation((locationArr) => [
+            ...locationArr,
+            { lat: latitude, lng: longitude },
+          ]);
+          sendMessage({
+            clientId: id,
+            latitude: latitude,
+            longitude: longitude,
+          });
         },
         (error) => {
           console.log(error);
@@ -65,8 +82,6 @@ const MapService = ({ locations, sendMessage, id }: { locations: Array<any>; sen
       console.log("Geolocation is not supported by this browser.");
     }
   };
-
-
 
   // on map load
   const onMapLoad = (map: google.maps.Map) => {
@@ -97,7 +112,6 @@ const MapService = ({ locations, sendMessage, id }: { locations: Array<any>; sen
     );
   };
 
-
   return (
     <div
       style={{
@@ -122,14 +136,17 @@ const MapService = ({ locations, sendMessage, id }: { locations: Array<any>; sen
 
       {/* map component  */}
       <GoogleMap
-        zoom={currentLocation || selectedPlace ? 18 : 12}
-        center={currentLocation || searchLngLat || center}
+        zoom={currentLocation[0] || selectedPlace ? 18 : 12}
+        center={currentLocation[0] || searchLngLat || center} // CHANGE THIS TO ID BASED
         mapContainerClassName="map"
         mapContainerStyle={{ width: "80%", height: "600px", margin: "auto" }}
-        onLoad= {onMapLoad}
+        onLoad={onMapLoad}
       >
         {selectedPlace && <Marker position={searchLngLat} />}
-        {currentLocation && <Marker position={currentLocation} />}
+        {currentLocation &&
+          currentLocation.map((location, index) => (
+            <Marker key={index} position={location} />
+          ))}
       </GoogleMap>
     </div>
   );

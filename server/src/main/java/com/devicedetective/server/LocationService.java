@@ -9,15 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mongodb.client.model.Filters;
 
+
 @Service
 public class LocationService {
 
     @Autowired
     private MongoClient mongoClient;
 
+    private static final String DATABASE_NAME = "test";
+    private static final String COLLECTION_NAME = "devicedetective";
+
     public void saveLocation(Location location) {
-        MongoDatabase database = mongoClient.getDatabase("test");
-        MongoCollection<Document> collection = database.getCollection("devicedetective");
+        MongoDatabase database = mongoClient.getDatabase(DATABASE_NAME);
+        MongoCollection<Document> collection = database.getCollection(COLLECTION_NAME);
 
         Document doc = new Document("clientId", location.getClientId())
                 .append("latitude", location.getLatitude())

@@ -12,7 +12,7 @@ interface LocationPayload {
   longitude: number;
 }
 
-const WebSocketComponent = ({ props }: {props: {id: string, locations: Array<any>}}) => {
+const WebSocketComponent = ({ props }: {props: {id: string, locations: Map<any, any>}}) => {
   const [client, setClient] = useState<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -30,7 +30,7 @@ const WebSocketComponent = ({ props }: {props: {id: string, locations: Array<any
   };
   useEffect(() => {
     // Create a new SockJS connection
-    const socket = new SockJS('http://172.20.10.7:8080/ws');
+    const socket = new SockJS('http://localhost:8080/ws');
     // Create a STOMP client over the SockJS connection
     const stompClient = new Client({
       webSocketFactory: () => socket,  // Use the SockJS connection for the STOMP client
@@ -55,7 +55,7 @@ const WebSocketComponent = ({ props }: {props: {id: string, locations: Array<any
           longitude: parseFloat(parsedMessage.longitude)
         };
       console.log('Message received: ' + message.body);
-      props.locations.push(locationJSON)
+      props.locations.set(locationJSON.clientId, {latitude: locationJSON.latitude, longitude: locationJSON.longitude});
       console.log(props.locations)
 
       });

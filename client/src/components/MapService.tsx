@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, MutableRefObject } from "react";
+import { useState, useEffect, useRef, MutableRefObject } from "react";
 import {
   GoogleMap,
   useLoadScript,
@@ -15,17 +15,21 @@ const MapService = ({
   sendMessage,
   id,
 }: {
-  locations: Array<any>;
+  locations: Map<any, any>;
   sendMessage: (message: any) => void;
   id: string;
 }) => {
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [searchLngLat, setSearchLngLat] = useState<any>(null);
-  const [currentLocation, setCurrentLocation] = useState<Array<any>>([null]);
+  const [currentLocation, setCurrentLocation] = useState<Map<any, any>>(Object());
   const autocompleteRef = useRef<google.maps.places.Autocomplete>();
   const [address, setAddress] = useState("");
   const libraries = ["places"] as Libraries;
   const libRef = useRef(libraries);
+
+  useEffect(() => {
+    setCurrentLocation(locations);
+  }, [currentLocation]);
 
   // load script for google map
   const googleMapsApiKey: string =
@@ -53,7 +57,7 @@ const MapService = ({
         });
       }
     }
-    setCurrentLocation([null]);
+    setCurrentLocation(Object());
   };
 
   // get current location
@@ -64,10 +68,6 @@ const MapService = ({
           const { latitude, longitude } = position.coords;
           setSelectedPlace(null);
           setSearchLngLat(null);
-          setCurrentLocation((locationArr) => [
-            ...locationArr,
-            { lat: latitude, lng: longitude },
-          ]);
           sendMessage({
             clientId: id,
             latitude: latitude,
@@ -136,16 +136,16 @@ const MapService = ({
 
       {/* map component  */}
       <GoogleMap
-        zoom={currentLocation[0] || selectedPlace ? 18 : 12}
-        center={currentLocation[0] || searchLngLat || center} // CHANGE THIS TO ID BASED
+        zoom={currentLocation.get(id) || selectedPlace ? 18 : 12}
+        center={currentLocation.get(id) || searchLngLat || center} // CHANGE THIS TO ID BASED
         mapContainerClassName="map"
         mapContainerStyle={{ width: "80%", height: "600px", margin: "auto" }}
         onLoad={onMapLoad}
       >
         {selectedPlace && <Marker position={searchLngLat} />}
         {currentLocation &&
-          currentLocation.map((location, index) => (
-            <Marker key={index} position={location} />
+          currentLocation.forEach((key, value) => (
+            <Marker key={key} position={value} />
           ))}
       </GoogleMap>
     </div>

@@ -21,7 +21,7 @@ const MapService = ({
 }) => {
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [searchLngLat, setSearchLngLat] = useState<any>(null);
-  const [currentLocation, setCurrentLocation] = useState<Map<any, any>>(Object());
+  const [currentLocation, setCurrentLocation] = useState<Map<any, any>>(new Map<any, any>());
   const autocompleteRef = useRef<google.maps.places.Autocomplete>();
   const [address, setAddress] = useState("");
   const libraries = ["places"] as Libraries;
@@ -29,7 +29,7 @@ const MapService = ({
 
   useEffect(() => {
     setCurrentLocation(locations);
-  }, [currentLocation]);
+  }, [currentLocation, locations]);
 
   // load script for google map
   const googleMapsApiKey: string =
@@ -57,7 +57,7 @@ const MapService = ({
         });
       }
     }
-    setCurrentLocation(Object());
+    setCurrentLocation(new Map());
   };
 
   // get current location
@@ -136,16 +136,16 @@ const MapService = ({
 
       {/* map component  */}
       <GoogleMap
-        zoom={currentLocation.get(id) || selectedPlace ? 18 : 12}
-        center={currentLocation.get(id) || searchLngLat || center} // CHANGE THIS TO ID BASED
+        zoom={currentLocation!.get(id) || selectedPlace ? 18 : 12}
+        center={currentLocation!.get(id)|| searchLngLat || center} // CHANGE THIS TO ID BASED
         mapContainerClassName="map"
         mapContainerStyle={{ width: "80%", height: "600px", margin: "auto" }}
         onLoad={onMapLoad}
       >
         {selectedPlace && <Marker position={searchLngLat} />}
         {currentLocation &&
-          currentLocation.forEach((key, value) => (
-            <Marker key={key} position={value} />
+          currentLocation!.forEach((key, value) => (
+            <Marker position={value} />
           ))}
       </GoogleMap>
     </div>

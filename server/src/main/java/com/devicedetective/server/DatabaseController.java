@@ -24,7 +24,7 @@ public class DatabaseController {
     public Document getData() {
         MongoDatabase database = mongoClient.getDatabase("test");
         MongoCollection<Document> collection = database.getCollection("devicedetective");
-        Bson filter = Filters.eq("_id", new String("test"));
+        Bson filter = Filters.eq("clientId", new String("test"));
         MongoCursor<Document> cursor = collection.find(filter).iterator();
         if (cursor.hasNext()) {
             return cursor.next();

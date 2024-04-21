@@ -7,16 +7,20 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Location {
 
     @Id
-    private String id;
-
+    private Object id;
+    private String clientId;
     private String latitude;
-
-    public Location() {}
     private String longitude;
 
-    public String getId() { return id;}
+    public Location() {}
 
-    public void setId(String id) { this.id = id;}
+    public Object getId() { return id;}
+
+    public void setId(Object id) { this.id = id;}
+
+    public String getClientId() { return clientId; }
+
+    public void setClientId(String clientId) { this.clientId = clientId; }
 
     public String getLatitude() {
         return latitude;

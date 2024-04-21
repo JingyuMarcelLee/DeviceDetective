@@ -30,7 +30,7 @@ const WebSocketComponent = ({ props }: {props: {id: string, locations: Array<any
   };
   useEffect(() => {
     // Create a new SockJS connection
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS('http://172.20.10.7:8080/ws');
     // Create a STOMP client over the SockJS connection
     const stompClient = new Client({
       webSocketFactory: () => socket,  // Use the SockJS connection for the STOMP client
@@ -46,21 +46,20 @@ const WebSocketComponent = ({ props }: {props: {id: string, locations: Array<any
       // Subscribe to a topic provided by the server
       console.log(isConnected)
       console.log(client)
-      stompClient.subscribe('/queue/locations', (message) => {
+      stompClient.subscribe('/topic/locations', (message) => {
         // Called when the client receives a message from the subscribed topic
         let parsedMessage: { _id: { timestamp: number; date: string }; clientId: string; latitude: string; longitude: string } = JSON.parse(message.body);
         let locationJSON: LocationPayload = {
           clientId: parsedMessage.clientId,
           latitude: parseFloat(parsedMessage.latitude),
           longitude: parseFloat(parsedMessage.longitude)
-      };
+        };
       console.log('Message received: ' + message.body);
       props.locations.push(locationJSON)
       console.log(props.locations)
 
       });
     };
-
 
 
     stompClient.onStompError = (frame) => {

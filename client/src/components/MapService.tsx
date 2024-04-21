@@ -26,10 +26,21 @@ const MapService = ({
   const [address, setAddress] = useState("");
   const libraries = ["places"] as Libraries;
   const libRef = useRef(libraries);
+  const [currentMarkers, setCurrentMarkers] = useState<Array<JSX.Element>>();
 
+  // Effect to update markers when currentLocation changes
   useEffect(() => {
-    setCurrentLocation(locations);
-  }, [currentLocation, locations]);
+    // Clear previous markers
+    setCurrentMarkers([]);
+
+    // Generate markers from currentLocation map
+    const markers = Array.from(currentLocation.entries()).map(([key, value]) => (
+      <Marker key={key} position={value} />
+    ));
+
+    // Set the markers to state
+    setCurrentMarkers(markers);
+  }, [currentLocation]);
 
   // load script for google map
   const googleMapsApiKey: string =
@@ -112,6 +123,7 @@ const MapService = ({
     );
   };
 
+
   return (
     <div
       style={{
@@ -143,10 +155,7 @@ const MapService = ({
         onLoad={onMapLoad}
       >
         {selectedPlace && <Marker position={searchLngLat} />}
-        {currentLocation &&
-          currentLocation!.forEach((key, value) => (
-            <Marker position={value} />
-          ))}
+        {currentMarkers}
       </GoogleMap>
     </div>
   );

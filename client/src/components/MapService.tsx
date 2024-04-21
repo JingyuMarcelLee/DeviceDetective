@@ -5,26 +5,31 @@ import {
   useLoadScript,
   Marker,
   Autocomplete,
+  Libraries,
 } from "@react-google-maps/api";
 
-const MapService = () => {
+import WebSocketComponent from "./SocketComponent";
+
+const MapService = ({ locations, sendMessage, id }: { locations: Array<any>; sendMessage: (message: any) => void ; id:string}) => {
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [searchLngLat, setSearchLngLat] = useState<any>(null);
   const [currentLocation, setCurrentLocation] = useState<any>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete>();
   const [address, setAddress] = useState("");
-  
+  const libraries = ["places"] as Libraries
+  const libRef = useRef(libraries)
+
   // load script for google map
   const googleMapsApiKey:string = process.env!.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: googleMapsApiKey,
-    libraries: ["places"],
+    libraries: libRef.current,
   });
   
   if (!isLoaded) return <div>Loading....</div>;
 
   // static lat and lng
-  const center = { lat: 'LATITUDE', lng: 'LONGITUDE' };
+  const center = { lat: 40.2027, lng: -77.2008 };
 
   // handle place change on search
   const handlePlaceChanged = () => {
@@ -49,7 +54,8 @@ const MapService = () => {
           const { latitude, longitude } = position.coords;
           setSelectedPlace(null);
           setSearchLngLat(null);
-          setCurrentLocation({ lat: latitude, lng: longitude });
+          setCurrentLocation({lat: latitude, lng: longitude });
+          sendMessage({clientId: id, latitude: latitude, longitude: longitude})
         },
         (error) => {
           console.log(error);
@@ -59,6 +65,8 @@ const MapService = () => {
       console.log("Geolocation is not supported by this browser.");
     }
   };
+
+
 
   // on map load
   const onMapLoad = (map: google.maps.Map) => {
@@ -88,6 +96,7 @@ const MapService = () => {
       controlDiv
     );
   };
+
 
   return (
     <div

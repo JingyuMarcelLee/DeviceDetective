@@ -38,6 +38,7 @@ const MapService = ({
   const libRef = useRef(libraries);
   const [currentMapLocation, setCurrentMapLocation] = useState<any>(null)
   const mapRef = useRef(maps);
+  const controlAddedRef = useRef(false);
   // Effect to update markers when currentLocation changes
   useEffect(() => {
 
@@ -119,34 +120,41 @@ const MapService = ({
       console.log("Geolocation is not supported by this browser.");
     }
   };
+
+  
   
   // on map load
   const onMapLoad = (map: google.maps.Map) => {
-    const controlDiv = document.createElement("div");
-    const controlUI = document.createElement("div");
-    controlUI.innerHTML = "Get Location";
-    controlUI.style.backgroundColor = "white";
-    controlUI.style.color = "black";
-    controlUI.style.border = "2px solid #ccc";
-    controlUI.style.borderRadius = "3px";
-    controlUI.style.boxShadow = "0 2px 6px rgba(0,0,0,.3)";
-    controlUI.style.cursor = "pointer";
-    controlUI.style.marginBottom = "22px";
-    controlUI.style.textAlign = "center";
-    controlUI.style.width = "100%";
-    controlUI.style.padding = "8px 0";
-    controlUI.addEventListener("click", handleGetLocationClick);
-    controlDiv.appendChild(controlUI);
     mapRef.current = map;
-    // const centerControl = new window.google.maps.ControlPosition(
-    //   window.google.maps.ControlPosition.TOP_CENTER,
-    //   0,
-    //   10
-    // );
 
-    map.controls[window.google.maps.ControlPosition.TOP_CENTER].push(
-      controlDiv
-    );
+    if (!controlAddedRef.current) {
+      const controlDiv = document.createElement("div");
+      const controlUI = document.createElement("div");
+      controlUI.innerHTML = "Get Location";
+      controlUI.style.backgroundColor = "white";
+      controlUI.style.color = "black";
+      controlUI.style.border = "2px solid #ccc";
+      controlUI.style.borderRadius = "3px";
+      controlUI.style.boxShadow = "0 2px 6px rgba(0,0,0,.3)";
+      controlUI.style.cursor = "pointer";
+      controlUI.style.marginBottom = "22px";
+      controlUI.style.textAlign = "center";
+      controlUI.style.width = "100%";
+      controlUI.style.padding = "8px 0";
+      controlUI.addEventListener("click", handleGetLocationClick);
+      controlDiv.appendChild(controlUI);
+      // mapRef.current = map;
+      // const centerControl = new window.google.maps.ControlPosition(
+      //   window.google.maps.ControlPosition.TOP_CENTER,
+      //   0,
+      //   10
+      // );
+
+      map.controls[window.google.maps.ControlPosition.TOP_CENTER].push(
+        controlDiv
+      );
+      controlAddedRef.current = true;
+    }
   };
 
   return (

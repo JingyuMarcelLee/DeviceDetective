@@ -6,7 +6,7 @@ import {
   Marker,
   Autocomplete,
   Libraries,
-} from "@react-google-maps/api"; 
+} from "@react-google-maps/api";
 import WebSocketComponent from "./SocketComponent";
 
 interface LocationPayload {
@@ -20,7 +20,7 @@ const MapService = ({
   sendMessage,
   setCurrentLocation,
   id,
-  locationMap
+  locationMap,
 }: {
   locations: Array<LocationPayload>;
   sendMessage: (message: any) => void;
@@ -36,20 +36,41 @@ const MapService = ({
   const libraries = ["places"] as Libraries;
   const maps = undefined as unknown as google.maps.Map;
   const libRef = useRef(libraries);
-  const [currentMapLocation, setCurrentMapLocation] = useState<any>(null)
+  const [currentMapLocation, setCurrentMapLocation] = useState<any>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const mapRef = useRef(maps);
   const controlAddedRef = useRef(false);
+  const [isSyncing, setIsSyncing] = useState(true);
   // Effect to update markers when currentLocation changes
-  useEffect(() => {
 
+  useEffect(() => {
+    const synchronizeTime = () => {
+      const now = Date.now();
+      const delay = 10000 - (now % 10000); // Time until the next multiple of 5 seconds
+      setTimeout(() => {
+        handleGetLocationClick(); // Call immediately after the delay
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = setInterval(handleGetLocationClick, 10000); // Continue every 5 seconds
+      }, delay);
+    };
+    if (isLoaded && isSyncing) {
+      synchronizeTime();
+      return () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+      };
+    }
+  }, [mapRef.current, isSyncing]);
+
+  useEffect(() => {
     if (isLoaded) {
       setMapOnAll(null);
-      setMarkers([])
+      setMarkers([]);
       console.log(locationMap);
-      const newMarkers:Array<google.maps.Marker> = []
+
+      const newMarkers: Array<google.maps.Marker> = [];
       Array.from(locationMap).forEach(([clientId, document], i) => {
-        let title = clientId
-        let position = {lat: document.latitude, lng: document.longitude}
+        let title = clientId;
+        let position = { lat: document.latitude, lng: document.longitude };
         const marker = new google.maps.Marker({
           position: position,
           map: mapRef.current,
@@ -58,8 +79,17 @@ const MapService = ({
           optimized: false,
         });
         newMarkers.push(marker);
-      })
+      });
       setMarkers(newMarkers);
+      var bounds = new google.maps.LatLngBounds();
+      for (var i = 0; i < markers.length; i++) {
+        bounds.extend(markers[i]!.getPosition()!);
+      }
+
+      mapRef.current.fitBounds(bounds);
+      if (mapRef!.current!.getZoom()! > 16) {
+        mapRef.current.setZoom(16)
+      }
     }
   }, [locations]);
 
@@ -94,7 +124,8 @@ const MapService = ({
         });
       }
     }
-    setCurrentLocation(new Map());
+    setIsSyncing(false);
+    // setCurrentMapLocation(new Map());
   };
 
   // get current location
@@ -110,7 +141,8 @@ const MapService = ({
             latitude: latitude,
             longitude: longitude,
           });
-          setCurrentMapLocation({lat: latitude, lng: longitude});
+          // setCurrentMapLocation({ lat: latitude, lng: longitude });
+          setIsSyncing(true)
         },
         (error) => {
           console.log(error);
@@ -121,12 +153,11 @@ const MapService = ({
     }
   };
 
-  
-  
   // on map load
   const onMapLoad = (map: google.maps.Map) => {
     mapRef.current = map;
-
+    mapRef.current.setCenter(center)
+    mapRef.current.setZoom(12)
     if (!controlAddedRef.current) {
       const controlDiv = document.createElement("div");
       const controlUI = document.createElement("div");
@@ -177,15 +208,19 @@ const MapService = ({
         options={{ fields: ["address_components", "geometry", "name"] }}
       >
         <div className="pt-3">
-          <input type="text" id="first_name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for Location" required />
+          <input
+            type="text"
+            id="first_name"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Search for Location"
+            required
+          />
         </div>
       </Autocomplete>
 
       {/* map component  */}
       <GoogleMap
         id="map"
-        zoom={currentMapLocation|| selectedPlace ? 18 : 12}
-        center={currentMapLocation || searchLngLat || center} // CHANGE THIS TO ID BASED
         mapContainerClassName="map"
         mapContainerStyle={{ width: "80%", height: "600px", margin: "auto" }}
         onLoad={onMapLoad}

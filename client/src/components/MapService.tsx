@@ -6,9 +6,14 @@ import {
   Marker,
   Autocomplete,
   Libraries,
-} from "@react-google-maps/api";
-
+} from "@react-google-maps/api"; 
 import WebSocketComponent from "./SocketComponent";
+
+interface LocationPayload {
+  clientId: string;
+  latitude: number;
+  longitude: number;
+}
 
 const MapService = ({
   locations,
@@ -16,7 +21,7 @@ const MapService = ({
   setCurrentLocation,
   id,
 }: {
-  locations: Map<any, any>;
+  locations: Array<LocationPayload>;
   sendMessage: (message: any) => void;
   setCurrentLocation: (location: any) => void;
   id: string;
@@ -24,7 +29,7 @@ const MapService = ({
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [searchLngLat, setSearchLngLat] = useState<any>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete>();
-  const [markers, setMarkers] = useState<Array<JSX.Element>>([]);
+  const [markers, setMarkers] = useState<Array<google.maps.Marker>>([]);
   const [address, setAddress] = useState("");
   const libraries = ["places"] as Libraries;
   const maps = undefined as unknown as google.maps.Map;
@@ -33,18 +38,33 @@ const MapService = ({
   const mapRef = useRef(maps);
   // Effect to update markers when currentLocation changes
   useEffect(() => {
+
     if (isLoaded) {
-      Array.from(locations).forEach(([title, position], i) => {
+      // setMapOnAll(null);
+      // setMarkers([])
+      console.log(locations);
+      const newMarkers:Array<google.maps.Marker> = []
+      locations.forEach((document, i) => {
+        let title = document.clientId
+        let position = {lat: document.latitude, lng: document.longitude}
         const marker = new google.maps.Marker({
-          position: {lat: position.lat, lng: position.lng},
+          position: position,
           map: mapRef.current,
           title: `${i + 1}. ${title}`,
           label: `${title}`,
           optimized: false,
         });
+        newMarkers.push(marker);
       })
+      setMarkers(newMarkers);
     }
   }, [locations]);
+
+  function setMapOnAll(map: google.maps.Map | null) {
+    for (let i = 0; i < markers.length; i++) {
+      markers[i].setMap(map);
+    }
+  }
 
   // load script for google map
   const googleMapsApiKey: string =

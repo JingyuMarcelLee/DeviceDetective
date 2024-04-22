@@ -14,11 +14,11 @@ interface LocationPayload {
 
 const WebSocketComponent = ({id, locations}: {
   id: string;
-  locations: Map<any, any>;
+  locations: Array<LocationPayload>;
 }) => {
   const [client, setClient] = useState<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [currentLocations, setCurrentLocations] = useState(new Map())
+  const [currentLocations, setCurrentLocations] = useState(new Array())
 
   const sendMessage = (message: any) => {
     // Check if the client is connected
@@ -59,10 +59,9 @@ const WebSocketComponent = ({id, locations}: {
           longitude: parseFloat(parsedMessage.longitude)
         };
       console.log('Message received: ' + message.body);
-      const newLocations = new Map(locations);
-      newLocations.set(locationJSON.clientId, {lat: locationJSON.latitude, lng: locationJSON.longitude});
-      console.log(newLocations);
-      setCurrentLocations(newLocations);
+      // const newLocations = new Map(locations);
+      setCurrentLocations(currentLocations => [...currentLocations, locationJSON]);
+
       });
 
       stompClient.publish({ destination: '/app/registerClient' })

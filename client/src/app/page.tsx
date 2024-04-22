@@ -9,10 +9,10 @@ export default function Home() {
     longitude: number;
   }
   const id = uuid();
-  const locations: Array<LocationPayload> = new Array<LocationPayload>()
+  // const locations: Array<LocationPayload> = new Array<LocationPayload>()
   return (
     <div>
-      <SocketComponent id={id} locations={locations}/>
+      <SocketComponent id={id}/>
     </div>
   );
 }

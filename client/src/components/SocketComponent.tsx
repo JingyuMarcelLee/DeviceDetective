@@ -12,13 +12,13 @@ interface LocationPayload {
   longitude: number;
 }
 
-const WebSocketComponent = ({id, locations}: {
+const WebSocketComponent = ({id}: {
   id: string;
-  locations: Array<LocationPayload>;
 }) => {
   const [client, setClient] = useState<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [currentLocations, setCurrentLocations] = useState(new Array())
+  const [currentLocations, setCurrentLocations] = useState(new Array());
+  const [locationMap, setLocationMap] = useState(new Map<string, LocationPayload>());
 
   const sendMessage = (message: any) => {
     // Check if the client is connected
@@ -59,9 +59,10 @@ const WebSocketComponent = ({id, locations}: {
           longitude: parseFloat(parsedMessage.longitude)
         };
       console.log('Message received: ' + message.body);
-      // const newLocations = new Map(locations);
+      const newLocations = locationMap;
+      newLocations.set(locationJSON.clientId, locationJSON);
+      setLocationMap(newLocations)
       setCurrentLocations(currentLocations => [...currentLocations, locationJSON]);
-
       });
 
       stompClient.publish({ destination: '/app/registerClient' })
@@ -85,7 +86,7 @@ const WebSocketComponent = ({id, locations}: {
 
   return (
     <div>
-      <MapService locations={currentLocations} sendMessage={sendMessage} setCurrentLocation={setCurrentLocations} id={id}/>
+      <MapService locations={currentLocations} sendMessage={sendMessage} setCurrentLocation={setCurrentLocations} id={id} locationMap={locationMap}/>
     </div>
   );
 };

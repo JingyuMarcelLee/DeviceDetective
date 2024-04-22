@@ -20,11 +20,13 @@ const MapService = ({
   sendMessage,
   setCurrentLocation,
   id,
+  locationMap
 }: {
   locations: Array<LocationPayload>;
   sendMessage: (message: any) => void;
   setCurrentLocation: (location: any) => void;
   id: string;
+  locationMap: Map<string, LocationPayload>;
 }) => {
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [searchLngLat, setSearchLngLat] = useState<any>(null);
@@ -40,12 +42,12 @@ const MapService = ({
   useEffect(() => {
 
     if (isLoaded) {
-      // setMapOnAll(null);
-      // setMarkers([])
-      console.log(locations);
+      setMapOnAll(null);
+      setMarkers([])
+      console.log(locationMap);
       const newMarkers:Array<google.maps.Marker> = []
-      locations.forEach((document, i) => {
-        let title = document.clientId
+      Array.from(locationMap).forEach(([clientId, document], i) => {
+        let title = clientId
         let position = {lat: document.latitude, lng: document.longitude}
         const marker = new google.maps.Marker({
           position: position,
@@ -166,7 +168,9 @@ const MapService = ({
         onPlaceChanged={handlePlaceChanged}
         options={{ fields: ["address_components", "geometry", "name"] }}
       >
-        <input type="text" placeholder="Search for a location" />
+        <div className="pt-3">
+          <input type="text" id="first_name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for Location" required />
+        </div>
       </Autocomplete>
 
       {/* map component  */}

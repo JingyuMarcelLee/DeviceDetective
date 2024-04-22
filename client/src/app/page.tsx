@@ -12,7 +12,7 @@ export default function Home() {
   const locations: Map<any, any> = new Map<any, any>()
   return (
     <div>
-      <SocketComponent props={{id, locations}}/>
+      <SocketComponent id={id} locations={locations}/>
     </div>
   );
 }

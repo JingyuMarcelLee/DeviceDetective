@@ -28,16 +28,16 @@ const WebSocketComponent = ({ props }: {props: {id: string, locations: Map<any, 
       console.error('WebSocket is not connected.');
     }
   };
+  
   useEffect(() => {
     // Create a new SockJS connection
     const socket = new SockJS('http://localhost:8080/ws');
     // Create a STOMP client over the SockJS connection
     const stompClient = new Client({
       webSocketFactory: () => socket,  // Use the SockJS connection for the STOMP client
-      debug: (str) => {
-        console.log(str);
-      },
+      debug: (str) => console.log(str),
     });
+
     setClient(stompClient);
     // Connect to the STOMP server
     setIsConnected(true);
@@ -59,6 +59,8 @@ const WebSocketComponent = ({ props }: {props: {id: string, locations: Map<any, 
       console.log(props.locations)
 
       });
+
+      stompClient.publish({ destination: '/app/registerClient' })
     };
 
 

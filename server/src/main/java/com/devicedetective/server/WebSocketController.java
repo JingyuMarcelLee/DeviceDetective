@@ -2,7 +2,6 @@ package com.devicedetective.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -29,36 +28,37 @@ public class WebSocketController {
     }
 
     @MessageMapping("/sendLocation")
-    @SendTo("/topic/locations")
-    public Location receiveLocation(Location location) {
+    public void receiveLocation(Location location) {
         logger.info("Received loc: {}", location.getLatitude());
+        this.cacheClient(location.getClientId());
         locationService.saveLocation(location);
-        return location;
+        messagingTemplate.convertAndSend("/topic/locations", location);
     }
 
     @MessageMapping("/syncLocations")
     public void handleLocationUpdates(Location location) {
-//        Set<String> clientIds = cacheService.getAllCachedClientIds();
-
-        // Save clientId to cache if non-existent
-//        if(!clientIds.contains(location.getClientId())) {
-//            cacheService.cacheClientId(location.getClientId());
-//        }
-        if(!cachedClientIds.contains(location.getClientId())){
-            cachedClientIds.add(location.getClientId());
-        }
-
         // Save to DB
+        this.cacheClient(location.getClientId());
         locationService.saveLocation(location);
 
-        // Retrieve all DB per client in reverse chronological (REAL)
+        // @TODO: Retrieve all DB per client in reverse chronological (REAL)
         // Get list of clientid - most recent location pair (DEMO)
         // Return clientId: location one per message
-        logger.info("num of cached ids: {}", cachedClientIds.size());
-        for(String clientId : cachedClientIds) {
+        logger.info("num of cached: {}", cachedClientIds.size());
+        for(String cId : cachedClientIds) {
             messagingTemplate.convertAndSend(
                     "/topic/locations",
-                    locationService.findLocationByClientId(clientId)
+                    locationService.findLocationByClientId(cId)
+            );
+        }
+    }
+
+    @MessageMapping("/registerClient")
+    public void registerNewClient() {
+        for(String cId : cachedClientIds) {
+            messagingTemplate.convertAndSend(
+                    "/topic/locations",
+                    locationService.findLocationByClientId(cId)
             );
         }
     }
@@ -66,5 +66,11 @@ public class WebSocketController {
     @MessageMapping("/message")
     public void receiveMessage(String message) {
         logger.info("Received message: {}", message);
+    }
+
+    private void cacheClient(String clientId) {
+        if(!cachedClientIds.contains(clientId)){
+            cachedClientIds.add(clientId);
+        }
     }
 }

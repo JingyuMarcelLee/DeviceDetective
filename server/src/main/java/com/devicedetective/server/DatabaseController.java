@@ -2,7 +2,6 @@ package com.devicedetective.server;
 
 import com.mongodb.client.model.Filters;
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Query;
@@ -47,6 +46,4 @@ public class DatabaseController {
         MongoCollection<Document> collection = database.getCollection("devicedetective");
         mongoOp.remove(new Query(), "devicedetective");
     }
-
-
 }

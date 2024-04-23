@@ -71,12 +71,25 @@ const MapService = ({
       Array.from(locationMap).forEach(([clientId, document], i) => {
         let title = clientId;
         let position = { lat: document.latitude, lng: document.longitude };
+        const markerColor = clientId === id 
+         ? {
+          url: '/red.png',
+          scaledSize: new google.maps.Size(32, 32),
+          anchor: new google.maps.Point(14, 14)
+        }
+         : {
+          url: '/blue.png',
+          scaledSize: new google.maps.Size(32, 32),
+          anchor: new google.maps.Point(14, 14)
+        };
+
         const marker = new google.maps.Marker({
           position: position,
           map: mapRef.current,
           title: `${i + 1}. ${title}`,
           label: `${title}`,
           optimized: false,
+          icon: markerColor,
         });
         newMarkers.push(marker);
       });
@@ -162,16 +175,17 @@ const MapService = ({
       const controlDiv = document.createElement("div");
       const controlUI = document.createElement("div");
       controlUI.innerHTML = "Get Location";
-      controlUI.style.backgroundColor = "white";
-      controlUI.style.color = "black";
-      controlUI.style.border = "2px solid #ccc";
-      controlUI.style.borderRadius = "3px";
-      controlUI.style.boxShadow = "0 2px 6px rgba(0,0,0,.3)";
+      controlUI.style.backgroundColor = "#5783db";
+      controlUI.style.color = "rgb(243 244 246)";
+      controlUI.style.border = "2px solid #5783db";
       controlUI.style.cursor = "pointer";
       controlUI.style.marginBottom = "22px";
       controlUI.style.textAlign = "center";
-      controlUI.style.width = "100%";
-      controlUI.style.padding = "8px 0";
+      controlUI.style.fontSize = "1.1rem";
+      controlUI.style.width = "120%";
+      controlUI.style.padding = "12px 10px";
+      controlUI.style.marginTop = "10px";
+      controlUI.style.borderRadius = "0.5rem";
       controlUI.addEventListener("click", handleGetLocationClick);
       controlDiv.appendChild(controlUI);
       // mapRef.current = map;
@@ -222,7 +236,12 @@ const MapService = ({
       <GoogleMap
         id="map"
         mapContainerClassName="map"
-        mapContainerStyle={{ width: "80%", height: "600px", margin: "auto" }}
+        mapContainerStyle={{ 
+          width: "80%", 
+          height: "600px", 
+          margin: "auto",
+          borderRadius: "0.5rem",
+        }}
         onLoad={onMapLoad}
       >
         {selectedPlace && <Marker position={searchLngLat} />}

@@ -32,11 +32,10 @@ const MapService = ({
   const [searchLngLat, setSearchLngLat] = useState<any>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete>();
   const [markers, setMarkers] = useState<Array<google.maps.Marker>>([]);
-  const [address, setAddress] = useState("");
   const libraries = ["places"] as Libraries;
   const maps = undefined as unknown as google.maps.Map;
   const libRef = useRef(libraries);
-  const [currentMapLocation, setCurrentMapLocation] = useState<any>(null);
+  // const [currentMapLocation, setCurrentMapLocation] = useState<any>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const mapRef = useRef(maps);
   const controlAddedRef = useRef(false);
@@ -46,11 +45,11 @@ const MapService = ({
   useEffect(() => {
     const synchronizeTime = () => {
       const now = Date.now();
-      const delay = 10000 - (now % 10000); // Time until the next multiple of 5 seconds
+      const delay = 10000 - (now % 10000); // Time until the next multiple of 10 seconds
       setTimeout(() => {
         handleGetLocationClick(); // Call immediately after the delay
         if (intervalRef.current) clearInterval(intervalRef.current);
-        intervalRef.current = setInterval(handleGetLocationClick, 10000); // Continue every 5 seconds
+        intervalRef.current = setInterval(handleGetLocationClick, 10000); // Continue every 10 seconds
       }, delay);
     };
     if (isLoaded && isSyncing) {
@@ -98,10 +97,13 @@ const MapService = ({
       for (var i = 0; i < markers.length; i++) {
         bounds.extend(markers[i]!.getPosition()!);
       }
-
-      mapRef.current.fitBounds(bounds);
-      if (mapRef!.current!.getZoom()! > 16) {
-        mapRef.current.setZoom(16)
+      if (!bounds.isEmpty()) {
+        mapRef.current.fitBounds(bounds);
+        if (mapRef!.current!.getZoom()! > 16) {
+          mapRef.current.setZoom(16)
+        }
+      } else {
+        mapRef.current.setCenter(center)
       }
     }
   }, [locations]);
@@ -160,10 +162,6 @@ const MapService = ({
           });
           // setCurrentMapLocation({ lat: latitude, lng: longitude });
           setIsSyncing(true)
-          mapRef.current.setCenter({
-            lat: latitude,
-            lng: longitude,
-          })
         },
         (error) => {
           console.log(error);

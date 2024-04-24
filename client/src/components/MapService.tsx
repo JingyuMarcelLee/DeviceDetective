@@ -135,6 +135,10 @@ const MapService = ({
           lat: place.geometry!.location.lat(),
           lng: place.geometry!.location.lng(),
         });
+        mapRef.current.setCenter({
+          lat: place.geometry!.location.lat(),
+          lng: place.geometry!.location.lng(),
+        })
       }
     }
     setIsSyncing(false);
@@ -156,6 +160,10 @@ const MapService = ({
           });
           // setCurrentMapLocation({ lat: latitude, lng: longitude });
           setIsSyncing(true)
+          mapRef.current.setCenter({
+            lat: latitude,
+            lng: longitude,
+          })
         },
         (error) => {
           console.log(error);

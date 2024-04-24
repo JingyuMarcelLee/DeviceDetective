@@ -34,8 +34,9 @@ const WebSocketComponent = ({id}: {
   };
   
   useEffect(() => {
+    const serverIP: string = process.env!.NEXT_PUBLIC_SERVER_IP_ADDRESS!;
     // Create a new SockJS connection
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS(serverIP);
     // Create a STOMP client over the SockJS connection
     const stompClient = new Client({
       webSocketFactory: () => socket,  // Use the SockJS connection for the STOMP client

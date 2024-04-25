@@ -7,7 +7,6 @@ import {
   Autocomplete,
   Libraries,
 } from "@react-google-maps/api";
-import WebSocketComponent from "./SocketComponent";
 
 interface LocationPayload {
   clientId: string;
@@ -15,6 +14,7 @@ interface LocationPayload {
   longitude: number;
 }
 
+// This component loads map via API and uses information from parent component to update map state
 const MapService = ({
   locations,
   sendMessage,
@@ -40,8 +40,8 @@ const MapService = ({
   const mapRef = useRef(maps);
   const controlAddedRef = useRef(false);
   const [isSyncing, setIsSyncing] = useState(true);
-  // Effect to update markers when currentLocation changes
 
+  // Effect to update markers when currentLocation changes
   useEffect(() => {
     const synchronizeTime = () => {
       const now = Date.now();
@@ -70,17 +70,18 @@ const MapService = ({
       Array.from(locationMap).forEach(([clientId, document], i) => {
         let title = clientId;
         let position = { lat: document.latitude, lng: document.longitude };
-        const markerColor = clientId === id 
-         ? {
-          url: '/red.png',
-          scaledSize: new google.maps.Size(32, 32),
-          anchor: new google.maps.Point(14, 14)
-        }
-         : {
-          url: '/blue.png',
-          scaledSize: new google.maps.Size(32, 32),
-          anchor: new google.maps.Point(14, 14)
-        };
+        const markerColor =
+          clientId === id
+            ? {
+                url: "/red.png",
+                scaledSize: new google.maps.Size(32, 32),
+                anchor: new google.maps.Point(14, 14),
+              }
+            : {
+                url: "/blue.png",
+                scaledSize: new google.maps.Size(32, 32),
+                anchor: new google.maps.Point(14, 14),
+              };
 
         const marker = new google.maps.Marker({
           position: position,
@@ -100,10 +101,10 @@ const MapService = ({
       if (!bounds.isEmpty()) {
         mapRef.current.fitBounds(bounds);
         if (mapRef!.current!.getZoom()! > 16) {
-          mapRef.current.setZoom(16)
+          mapRef.current.setZoom(16);
         }
       } else {
-        mapRef.current.setCenter(center)
+        mapRef.current.setCenter(center);
       }
     }
   }, [locations]);
@@ -140,7 +141,7 @@ const MapService = ({
         mapRef.current.setCenter({
           lat: place.geometry!.location.lat(),
           lng: place.geometry!.location.lng(),
-        })
+        });
       }
     }
     setIsSyncing(false);
@@ -161,7 +162,7 @@ const MapService = ({
             longitude: longitude,
           });
           // setCurrentMapLocation({ lat: latitude, lng: longitude });
-          setIsSyncing(true)
+          setIsSyncing(true);
         },
         (error) => {
           console.log(error);
@@ -175,8 +176,8 @@ const MapService = ({
   // on map load
   const onMapLoad = (map: google.maps.Map) => {
     mapRef.current = map;
-    mapRef.current.setCenter(center)
-    mapRef.current.setZoom(12)
+    mapRef.current.setCenter(center);
+    mapRef.current.setZoom(12);
     if (!controlAddedRef.current) {
       const controlDiv = document.createElement("div");
       const controlUI = document.createElement("div");
@@ -242,9 +243,9 @@ const MapService = ({
       <GoogleMap
         id="map"
         mapContainerClassName="map"
-        mapContainerStyle={{ 
-          width: "80%", 
-          height: "600px", 
+        mapContainerStyle={{
+          width: "80%",
+          height: "600px",
           margin: "auto",
           borderRadius: "0.5rem",
         }}

@@ -5,13 +5,14 @@ import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import MapService from './MapService';
 
-
+// Interface for location payload that will be sent to the server
 interface LocationPayload {
   clientId: string;
   latitude: number;
   longitude: number;
 }
 
+// This component establishes websocket communication with the server and passes information down to the map component
 const WebSocketComponent = ({id}: {
   id: string;
 }) => {
